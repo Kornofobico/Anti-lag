@@ -1,147 +1,70 @@
--- Anti-Lag Completo
-
 local ToDisable = {
-    Textures = true,
-    VisualEffects = true,
-    Parts = true,
-    Particles = true,
-    Sky = true
+	Textures = true,
+	VisualEffects = true,
+	Parts = true,
+	Particles = true,
+	Sky = true
 }
 
 local ToEnable = {
-    FullBright = false
+	FullBright = false
 }
 
 local Stuff = {}
 
-for _, v in ipairs(game:GetDescendants()) do
-
-    -- Partes simples
-    if ToDisable.Parts then
-        if v:IsA("Part") or v:IsA("UnionOperation") or v:IsA("MeshPart") or v:IsA("BasePart") then
-            v.Material = Enum.Material.SmoothPlastic
-            v.CastShadow = false
-            table.insert(Stuff, v)
-        end
-    end
-
-    -- Remover Mesh + textura
-    if v:IsA("SpecialMesh") then
-        v.MeshId = ""
-        v.TextureId = ""
-        table.insert(Stuff, v)
-    end
-
-    -- Partículas
-    if ToDisable.Particles then
-        if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Explosion") or v:IsA("Sparkles") or v:IsA("Fire") then
-            v.Enabled = false
-            if v:IsA("ParticleEmitter") then
-                v.Rate = 0
-                v.Lifetime = NumberRange.new(0)
-            end
-            table.insert(Stuff, v)
-        end
-    end
-
-    -- Efeitos visuais
-    if ToDisable.VisualEffects then
-        if v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect") then
-            v.Enabled = false
-            table.insert(Stuff, v)
-        end
-    end
-
-    -- Texturas
-    if ToDisable.Textures then
-        if v:IsA("Decal") or v:IsA("Texture") then
-            v.Texture = ""
-            table.insert(Stuff, v)
-        end
-    end
-
-    -- Sky
-    if ToDisable.Sky then
-        if v:IsA("Sky") then
-            v:Destroy()
-            table.insert(Stuff, v)
-        end
-    end
-
-    -- Highlight
-    if v:IsA("Highlight") then
-        v.Enabled = false
-        table.insert(Stuff, v)
-    end
-
-    -- Roupas
-    if v:IsA("ShirtGraphic") or v:IsA("Shirt") or v:IsA("Pants") then
-        v:Destroy()
-        table.insert(Stuff, v)
-    end
-
-    -- Luzes
-    if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-        v.Enabled = false
-        table.insert(Stuff, v)
-    end
-
-    -- Ajustar MeshPart LOD
-    if v:IsA("MeshPart") then
-        v.RenderFidelity = Enum.RenderFidelity.Automatic
-    end
+for _, v in next, game:GetDescendants() do
+	if ToDisable.Parts then
+		if v:IsA("Part") or v:IsA("Union") or v:IsA("BasePart") then
+			v.Material = Enum.Material.SmoothPlastic
+			table.insert(Stuff, 1, v)
+		end
+	end
+	
+	if ToDisable.Particles then
+		if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Explosion") or v:IsA("Sparkles") or v:IsA("Fire") then
+			v.Enabled = false
+			table.insert(Stuff, 1, v)
+		end
+	end
+	
+	if ToDisable.VisualEffects then
+		if v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect") then
+			v.Enabled = false
+			table.insert(Stuff, 1, v)
+		end
+	end
+	
+	if ToDisable.Textures then
+		if v:IsA("Decal") or v:IsA("Texture") then
+			v.Texture = ""
+			table.insert(Stuff, 1, v)
+		end
+	end
+	
+	if ToDisable.Sky then
+		if v:IsA("Sky") then
+			v.Parent = nil
+			table.insert(Stuff, 1, v)
+		end
+	end
 end
 
--- Remover pós-processamento da câmera
-local cam = workspace.CurrentCamera
-for _, effect in ipairs(cam:GetChildren()) do
-    if effect:IsA("PostEffect") then
-        effect.Enabled = false
-    end
+game:GetService("TestService"):Message("Effects Disabler Script : Successfully disabled "..#Stuff.." assets / effects. Settings :")
+
+for i, v in next, ToDisable do
+	print(tostring(i)..": "..tostring(v))
 end
 
--- Ajustar água
-workspace.Terrain.WaterWaveSize = 0
-workspace.Terrain.WaterWaveSpeed = 0
-workspace.Terrain.WaterReflectance = 0
-workspace.Terrain.WaterTransparency = 1
-
--- Streaming (menos partes carregadas)
-workspace.StreamingEnabled = true
-workspace.StreamingMinRadius = 16
-workspace.StreamingTargetRadius = 32
-
--- Iluminação mínima
-local Lighting = game.Lighting
-Lighting.GlobalShadows = false
-Lighting.EnvironmentSpecularScale = 0
-Lighting.EnvironmentDiffuseScale = 0
-
--- Reduz blending de animações
-for _, v in ipairs(game:GetDescendants()) do
-    if v:IsA("Animator") then
-        v.AnimationWeightedBlendFix = false
-    end
-end
-
--- FPS cap
-pcall(function()
-    setfpscap(60)
-end)
-
--- Qualidade mínima
-settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-
--- FullBright
 if ToEnable.FullBright then
-    Lighting.FogColor = Color3.new(1,1,1)
+    local Lighting = game:GetService("Lighting")
+    
+    Lighting.FogColor = Color3.fromRGB(255, 255, 255)
     Lighting.FogEnd = math.huge
     Lighting.FogStart = math.huge
-    Lighting.Ambient = Color3.new(1,1,1)
+    Lighting.Ambient = Color3.fromRGB(255, 255, 255)
     Lighting.Brightness = 5
-    Lighting.ColorShift_Bottom = Color3.new(1,1,1)
-    Lighting.ColorShift_Top = Color3.new(1,1,1)
-    Lighting.OutdoorAmbient = Color3.new(1,1,1)
+    Lighting.ColorShift_Bottom = Color3.fromRGB(255, 255, 255)
+    Lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255)
+    Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+    Lighting.Outlines = true
 end
-
-game:GetService("TestService"):Message("Anti-Lag: desativado "..#Stuff.." itens.")
